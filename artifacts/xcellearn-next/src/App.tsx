@@ -120,17 +120,7 @@ function Shell({ role, children, onLogout }: { role: Role; children: React.React
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const profile = currentUser[role];
-  const nav = role === 'student' ? [
-    { href: '/student/dashboard', label: 'Overview', icon: LayoutDashboard },
-    { href: '/student/assignments', label: 'Assignments', icon: ClipboardCheck, count: 2 },
-    { href: '/student/library', label: 'Library', icon: LibraryBig },
-    { href: '/student/profile', label: 'My profile', icon: CircleUserRound },
-  ] : role === 'lecturer' ? [
-    { href: '/lecturer/dashboard', label: 'Overview', icon: LayoutDashboard },
-    { href: '/lecturer/assignments', label: 'Assignments', icon: ClipboardCheck },
-    { href: '/lecturer/submissions', label: 'Submissions', icon: CheckCircle2, count: 18 },
-    { href: '/lecturer/profile', label: 'My profile', icon: CircleUserRound },
-  ] : [
+  const nav = role === 'admin' ? [
     { href: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
     { href: '/admin/users', label: 'Users', icon: UsersRound },
     { href: '/admin/departments', label: 'Departments', icon: Building2 },
@@ -138,44 +128,61 @@ function Shell({ role, children, onLogout }: { role: Role; children: React.React
     { href: '/admin/courses', label: 'Courses', icon: BookOpen },
     { href: '/admin/assignments', label: 'Assignments', icon: ClipboardCheck },
     { href: '/admin/activity', label: 'Activity log', icon: Activity },
+  ] : role === 'student' ? [
+    { href: '/student/library', label: 'Library', icon: LibraryBig },
+    { href: '/student/assignments', label: 'Assignments', icon: ClipboardCheck },
+    { href: '/notifications', label: 'Notifications', icon: Bell, count: 2 },
+    { href: '/student/profile', label: 'Profile', icon: CircleUserRound },
+  ] : [
+    { href: '/lecturer/assignments', label: 'Assignments', icon: ClipboardCheck },
+    { href: '/lecturer/submissions', label: 'Submissions', icon: CheckCircle2 },
+    { href: '/notifications', label: 'Notifications', icon: Bell, count: 2 },
+    { href: '/lecturer/profile', label: 'Profile', icon: CircleUserRound },
   ];
   const home = role === 'student' ? '/student/dashboard' : role === 'lecturer' ? '/lecturer/dashboard' : '/admin/dashboard';
-  return <div className="app-frame grain">
-    <aside className={`app-sidebar ${mobileOpen ? 'open' : ''}`}>
-      <div className="sidebar-top"><Logo /><button className="mobile-close icon-button" onClick={() => setMobileOpen(false)}><X size={18} /></button></div>
-      <div className="workspace-switcher"><div className="workspace-orb"><GraduationCap size={18} /></div><div><div className="workspace-name">XcelLearn 1.1</div><div className="workspace-meta">2024 / 25 · Semester 1</div></div><ChevronDown size={14} className="ml-auto text-muted-foreground" /></div>
-      <div className="sidebar-section-label">Workspace</div>
-      <nav className="side-nav">{nav.map((item) => {
-        const active = location === item.href;
-        return <Link key={item.href} href={item.href} data-testid={`link-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={`nav-item ${active ? 'active' : ''}`}><item.icon size={17} /><span>{item.label}</span>{item.count && <span className="nav-count">{item.count}</span>}</Link>;
-      })}</nav>
-      <div className="sidebar-spacer" />
-      <div className="sidebar-section-label">Your space</div>
-      <Link href="/notifications" className={`nav-item ${location === '/notifications' ? 'active' : ''}`} data-testid="link-notifications"><Bell size={17} /><span>Notifications</span><span className="notification-dot" /></Link>
-      <button className="nav-item w-full" onClick={() => alert('Settings are ready for your next term.')} data-testid="button-settings"><Settings2 size={17} /><span>Settings</span></button>
-      <div className="sidebar-profile"><Avatar initials={profile.initials} size="sm" /><div className="min-w-0"><div className="profile-name truncate">{profile.name}</div><div className="profile-role">{profile.role}</div></div><button onClick={onLogout} className="icon-button ml-auto" title="Sign out" data-testid="button-logout"><LogOut size={15} /></button></div>
-    </aside>
-    <main className="app-main">
-      <header className="topbar"><button className="mobile-menu icon-button" onClick={() => setMobileOpen(true)} data-testid="button-open-menu"><Menu size={20} /></button><div className="topbar-crumb"><span className="hidden sm:inline">XcelLearn</span><ChevronRight size={14} /><span className="text-muted-foreground">{role === 'student' ? 'Student workspace' : role === 'lecturer' ? 'Teaching workspace' : 'Registry workspace'}</span></div><div className="topbar-actions"><Link href="/notifications" className="icon-button notification-button" data-testid="link-topbar-notifications"><Bell size={18} /><span /></Link><div className="topbar-divider" /><button className="topbar-user" onClick={() => { window.location.href = `${home.replace('dashboard', 'profile')}`; }} data-testid="button-topbar-profile"><Avatar initials={profile.initials} size="sm" /><span className="hidden md:block">{profile.name.split(' ')[0]}</span><ChevronDown size={14} /></button></div></header>
-      <div className="page-content">{children}</div>
-    </main>
+  const isAdmin = role === 'admin';
+  if (isAdmin) {
+    return <div className="original-app-frame">
+      <button className="original-mobile-menu" onClick={() => setMobileOpen(!mobileOpen)} data-testid="button-open-menu">{mobileOpen ? <X size={24} /> : <Menu size={24} />}</button>
+      <aside className={`original-sidebar ${mobileOpen ? 'open' : ''}`}>
+        <div className="original-sidebar-brand"><strong>XcelLearn</strong><span>by XEStudioz</span></div>
+        <nav className="original-sidebar-nav">{nav.map((item) => <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className={location === item.href ? 'active' : ''} data-testid={`link-${item.label.toLowerCase().replaceAll(' ', '-')}`}><item.icon size={18} />{item.label}</Link>)}</nav>
+        <div className="original-sidebar-profile"><div className="original-avatar">{profile.initials}</div><div><strong>{profile.name}</strong><span>{profile.role}</span></div></div>
+        <button className="original-logout" onClick={onLogout} data-testid="button-logout"><LogOut size={16} /> Logout</button>
+      </aside>
+      {mobileOpen && <button className="original-sidebar-overlay" onClick={() => setMobileOpen(false)} aria-label="Close menu" />}
+      <main className="original-main"><div className="original-page">{children}</div></main>
+    </div>;
+  }
+  return <div className="original-role-frame">
+    <header className="original-role-header"><div><strong>XcelLearn</strong><span>by XEStudioz</span></div><Link href="/notifications" className="original-bell" data-testid="link-topbar-notifications"><Bell size={20} />{(nav.find(n => n.label === 'Notifications') as any)?.count > 0 && <b>2</b>}</Link></header>
+    <main className="original-role-main"><div className="original-role-page">{children}</div></main>
+    <nav className="original-bottom-nav">{nav.map((item) => { const active = location === item.href || location.startsWith(item.href + '/'); return <Link key={item.href} href={item.href} className={active ? 'active' : ''} data-testid={`nav-tab-${item.label.toLowerCase()}`}><span className="original-nav-icon"><item.icon size={22} strokeWidth={active ? 2.5 : 1.8} />{item.count && <b>{item.count}</b>}</span><small>{item.label}</small>{active && <i />}</Link>; })}</nav>
   </div>;
 }
 
 function Login({ onLogin }: { onLogin: (role: Role) => void }) {
   const [role, setRole] = useState<Role>('student');
-  const [email, setEmail] = useState('');
-  return <div className="login-page grain"><div className="login-art"><div className="login-art-copy"><div className="eyebrow text-white/65">The academic command center</div><h1 className="font-display">Make your<br /><em>next mark.</em></h1><p>One clear place for the work, people and momentum that move a term forward.</p></div><div className="login-constellation"><span /><span /><span /><span /><div className="constellation-line line-a" /><div className="constellation-line line-b" /></div><div className="login-footer">XCELLEARN 1.1 <span>·</span> BUILT FOR THE FULL TERM</div></div><div className="login-panel"><div className="login-panel-inner"><Logo /><div className="login-heading"><div className="eyebrow">Welcome back</div><h2>Pick up where<br />you left off.</h2><p>Use a demo identity to step into XcelLearn.</p></div><div className="role-tabs" role="tablist">{(['student', 'lecturer', 'admin'] as Role[]).map((item) => <button key={item} onClick={() => setRole(item)} className={role === item ? 'selected' : ''} data-testid={`button-role-${item}`}>{item === 'admin' ? 'Admin' : item[0].toUpperCase() + item.slice(1)}</button>)}</div><form onSubmit={(e) => { e.preventDefault(); onLogin(role); }}><label className="field-label">Email address <span>demo optional</span></label><input className="field-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={role === 'student' ? 'amara@university.edu' : role === 'lecturer' ? 'mateo@university.edu' : 'nia@university.edu'} data-testid="input-login-email" /><label className="field-label mt-4">Password</label><input className="field-input" type="password" defaultValue="xcellearn" data-testid="input-login-password" /><Button type="submit" className="w-full mt-6" testId="button-sign-in">Enter {role === 'admin' ? 'admin' : role} workspace <ArrowUpRight size={16} /></Button></form><div className="login-note"><ShieldCheck size={15} /> Demo mode · no account or server required</div></div><div className="login-panel-bottom">Need a different identity? <button onClick={() => setRole(role === 'student' ? 'lecturer' : role === 'lecturer' ? 'admin' : 'student')} data-testid="button-switch-role">Switch role</button></div></div></div>;
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const fillDemo = (nextRole: Role) => { setRole(nextRole); setUsername(nextRole === 'student' ? 'student1' : nextRole === 'lecturer' ? 'lect1' : 'admin'); setPassword(nextRole === 'admin' ? 'admin123' : 'pass123'); };
+  return <div className="original-login-page"><div className="original-login-wrap"><div className="original-login-brand"><h1>XcelLearn</h1><p>by XEStudioz</p></div><section className="original-login-card"><div className="original-login-card-head"><h2>Welcome back</h2><p>Select your role to sign in</p></div><div className="original-role-tabs">{(['student', 'lecturer', 'admin'] as Role[]).map((item) => <button key={item} onClick={() => fillDemo(item)} className={role === item ? 'selected' : ''} data-testid={`button-role-${item}`}>{item === 'admin' ? 'Admin' : item[0].toUpperCase() + item.slice(1)}</button>)}</div><form className="original-login-form" onSubmit={(e) => { e.preventDefault(); onLogin(role); }}><label>Username<input value={username} onChange={e => setUsername(e.target.value)} placeholder="Enter username" data-testid="input-username" /></label><label>Password<input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" data-testid="input-password" /></label><Button type="submit" className="w-full" testId="button-submit">Sign In</Button></form><div className="original-demo-credentials"><strong>Demo Credentials</strong><button onClick={() => fillDemo('admin')}>Admin: admin / admin123</button><button onClick={() => fillDemo('student')}>Student: student1 / pass123</button><button onClick={() => fillDemo('lecturer')}>Lecturer: lect1 / pass123</button></div></section></div></div>;
 }
 
 function StudentDashboard() {
-  const [showAll, setShowAll] = useState(false);
-  const due = initialAssignments.filter(a => a.status !== 'Marked').slice(0, showAll ? 4 : 3);
-  return <div><PageTitle eyebrow="Tuesday, 15 October 2024" title="Good morning, Amara." description="Your term has a rhythm. Here’s what’s moving today." action={<Button variant="quiet" onClick={() => alert('Calendar view opens in your connected calendar.')} testId="button-view-calendar"><CalendarDays size={16} /> View calendar</Button>} />
-    <div className="dashboard-hero reveal"><div><div className="eyebrow text-primary">Term pulse</div><h2>Keep the small<br /><span>promises</span> to yourself.</h2><p>You’re 68% through your coursework this semester. One focused hour today keeps your week light.</p><Button onClick={() => window.location.href = '/student/assignments'} testId="button-see-work">See my work <ArrowUpRight size={16} /></Button></div><div className="hero-progress"><div className="progress-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="49" /><circle className="ring-value" cx="60" cy="60" r="49" /></svg><div><strong>68</strong><span>%</span></div></div><span>term progress</span></div></div>
-    <div className="stat-grid reveal reveal-delay-1"><StatCard label="Course average" value="78.4%" detail="+4.2% from last month" icon={TrendingUp} tone="teal" /><StatCard label="Due this week" value="03" detail="1 due tomorrow" icon={Clock3} tone="coral" /><StatCard label="Study rhythm" value="18.7h" detail="+2.4h this week" icon={Target} tone="gold" /><StatCard label="Completed" value="14 / 19" detail="74% of assignments" icon={CheckCircle2} tone="blue" /></div>
-    <div className="dashboard-grid mt-6"><section className="card-shell panel reveal reveal-delay-2"><div className="panel-head"><div><h3>Up next</h3><p>The work that deserves your attention.</p></div><Link href="/student/assignments" className="text-link" data-testid="link-all-assignments">All assignments <ArrowUpRight size={14} /></Link></div><div className="assignment-list">{due.map(a => <AssignmentRow key={a.id} assignment={a} />)}</div><button className="load-more" onClick={() => setShowAll(!showAll)} data-testid="button-show-more-assignments">{showAll ? 'Show less' : 'Show more assignments'} <ChevronDown size={15} /></button></section><section className="card-shell panel reveal reveal-delay-3"><div className="panel-head"><div><h3>Your courses</h3><p>Progress across the semester.</p></div><Link href="/student/library" className="text-link" data-testid="link-open-library">Open library <ArrowUpRight size={14} /></Link></div><div className="course-mini-list">{courses.map(c => <div className="course-mini" key={c.code}><div className={`course-dot ${c.color}`} /><div className="min-w-0 flex-1"><div className="flex justify-between gap-2"><strong>{c.code}</strong><span>{c.progress}%</span></div><div className="course-name truncate">{c.name}</div><ProgressBar value={c.progress} tone={c.color} /><div className="course-next">Next · {c.next}</div></div></div>)}</div></section></div>
-    <div className="dashboard-grid lower mt-6"><section className="card-shell panel"><div className="panel-head"><div><h3>Study rhythm</h3><p>Hours you’ve spent in the workspace.</p></div><span className="period-chip">This week <ChevronDown size={13} /></span></div><div className="chart-wrap"><ResponsiveContainer width="100%" height={190}><AreaChart data={weeklyData}><defs><linearGradient id="tealFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#3a9f89" stopOpacity=".25" /><stop offset="100%" stopColor="#3a9f89" stopOpacity="0" /></linearGradient></defs><XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#82928d', fontSize: 11 }} /><YAxis hide /><Tooltip cursor={{ stroke: '#d4e2de' }} contentStyle={{ border: '1px solid #dbe5e1', borderRadius: 10, fontSize: 12 }} /><Area type="monotone" dataKey="hours" stroke="#318e79" strokeWidth={2.5} fill="url(#tealFill)" /></AreaChart></ResponsiveContainer></div></section><section className="card-shell panel"><div className="panel-head"><div><h3>Recent activity</h3><p>Small signals from your classes.</p></div><Link href="/notifications" className="text-link" data-testid="link-activity-notifications">View all <ArrowUpRight size={14} /></Link></div><div className="activity-list">{activity.map(item => <div className="activity-item" key={item.id}><IconBadge kind={item.kind} /><div className="min-w-0"><strong>{item.title}</strong><span>{item.detail}</span><small>{item.time}</small></div></div>)}</div></section></div>
+  const due = initialAssignments.filter(a => a.status !== 'Marked').slice(0, 3);
+  return <div className="original-dashboard-stack">
+    <div className="original-simple-title"><h1>Welcome back, Amara</h1><p>Here is your progress overview.</p></div>
+    <div className="original-stat-grid">
+      <div className="original-stat-card"><span>Enrolled Courses</span><strong>4</strong><BookOpen size={16} /></div>
+      <div className="original-stat-card"><span>Assignments Progress</span><strong>14 / 19</strong><FileText size={16} /></div>
+      <div className="original-stat-card"><span>Quizzes Completed</span><strong>6 / 8</strong><CheckCircle2 size={16} /></div>
+      <div className="original-stat-card primary"><span>Upcoming Deadlines</span><strong>{due.length}</strong><Clock3 size={16} /></div>
+    </div>
+    <div className="original-dashboard-columns">
+      <section className="original-simple-card"><h2>Approaching Deadlines</h2><div className="original-deadline-list">{due.map(a => <div key={a.id}><div><strong>{a.title}</strong><small>Due: {a.due}</small></div><Link href="/student/assignments">View</Link></div>)}</div></section>
+      <section className="original-simple-card"><h2>Course progress</h2>{courses.slice(0, 3).map(c => <div className="original-course-line" key={c.code}><div><span>{c.code}</span><b>{c.progress}%</b></div><ProgressBar value={c.progress} tone="teal" /></div>)}</section>
+    </div>
   </div>;
 }
 
@@ -214,7 +221,15 @@ function ProfilePage({ role }: { role: Role }) {
 }
 
 function LecturerDashboard({ assignments }: { assignments: Assignment[] }) {
-  return <div><PageTitle eyebrow="Tuesday, 15 October 2024" title="Good morning, Mateo." description="Your teaching desk, in one calm view." action={<Button onClick={() => alert('Announcement composer opened.')} variant="quiet" testId="button-new-announcement"><Mail size={16} /> New announcement</Button>} /><div className="dashboard-hero lecturer-hero reveal"><div><div className="eyebrow text-primary">Teaching pulse</div><h2>Clear feedback<br /><span>moves people.</span></h2><p>18 submissions are waiting for your attention. Your classes are 84% on track this week.</p><Button onClick={() => window.location.href = '/lecturer/submissions'} testId="button-review-submissions">Review submissions <ArrowUpRight size={16} /></Button></div><div className="hero-metric"><span>marking queue</span><strong>18</strong><div><span>↓ 6 from last week</span></div></div></div><div className="stat-grid reveal reveal-delay-1"><StatCard label="Active students" value="186" detail="+12 this semester" icon={UsersRound} tone="teal" /><StatCard label="To be marked" value="18" detail="Across 3 courses" icon={ClipboardCheck} tone="coral" /><StatCard label="On-time rate" value="92%" detail="+7% from last term" icon={CheckCircle2} tone="gold" /><StatCard label="Avg. class score" value="76.8%" detail="Across 148 submissions" icon={BarChart3} tone="blue" /></div><div className="dashboard-grid mt-6"><section className="card-shell panel"><div className="panel-head"><div><h3>Assignment activity</h3><p>Submission progress across your classes.</p></div><Link href="/lecturer/assignments" className="text-link">Manage <ArrowUpRight size={14} /></Link></div><div className="assignment-list">{assignments.slice(0, 4).map(a => <AssignmentRow key={a.id} assignment={a} lecturer />)}</div></section><section className="card-shell panel"><div className="panel-head"><div><h3>Next on your calendar</h3><p>Tuesday · Week 08</p></div><CalendarDays size={20} className="text-primary" /></div><div className="calendar-next"><div className="calendar-date"><strong>15</strong><span>OCT</span></div><div><strong>Systems Analysis studio</strong><span>14:00 – 16:00 · Studio 2</span><small>Use-case modelling critique</small></div></div><div className="calendar-next muted"><div className="calendar-date"><strong>17</strong><span>OCT</span></div><div><strong>Data & Society seminar</strong><span>10:00 – 12:00 · Room B14</span><small>Guest: K. Addo, Civic Lab</small></div></div><Button variant="quiet" className="w-full mt-3" onClick={() => alert('Calendar view opened.')} testId="button-open-lecturer-calendar">Open calendar <ArrowUpRight size={14} /></Button></section></div></div>;
+  return <div className="original-dashboard-stack">
+    <div className="original-simple-title"><h1>Welcome, Mateo</h1><p>Here is your lecturer overview.</p></div>
+    <div className="original-stat-grid lecturer">
+      <div className="original-stat-card"><span>Courses Taught</span><strong>4</strong><UsersRound size={16} /></div>
+      <div className="original-stat-card"><span>Assignments Posted</span><strong>{assignments.length}</strong><FileText size={16} /></div>
+      <div className="original-stat-card primary"><span>Pending Submissions</span><strong>18</strong><CheckCircle2 size={16} /></div>
+    </div>
+    <section className="original-simple-card original-recent-card"><h2><Activity size={18} /> Recent Submissions</h2>{assignments.slice(0, 3).map(a => <div className="original-submission-line" key={a.id}><span>New submission to grade</span><Link href="/lecturer/submissions">Review</Link></div>)}</section>
+  </div>;
 }
 
 function LecturerAssignments({ assignments, setAssignments }: { assignments: Assignment[]; setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>> }) {
@@ -235,8 +250,15 @@ function LecturerSubmissions() {
 }
 
 function AdminDashboard() {
-  const stats = [{ label: 'Active users', value: '2,486', detail: '+8.4% this month', icon: UsersRound, tone: 'teal' }, { label: 'Courses running', value: '84', detail: 'Across 6 faculties', icon: BookOpen, tone: 'coral' }, { label: 'Assignments', value: '312', detail: '48 awaiting review', icon: ClipboardCheck, tone: 'gold' }, { label: 'Completion rate', value: '87.2%', detail: '+3.1% this term', icon: TrendingUp, tone: 'blue' }];
-  return <div><PageTitle eyebrow="Registry overview · Week 08" title="The whole picture." description="A steady read on the people, courses and activity shaping this term." action={<Button variant="quiet" onClick={() => alert('Institution report generated.')} testId="button-generate-report"><Download size={16} /> Generate report</Button>} /><div className="stat-grid reveal">{stats.map(s => <StatCard key={s.label} {...s} />)}</div><div className="dashboard-grid mt-6"><section className="card-shell panel"><div className="panel-head"><div><h3>Enrollment pulse</h3><p>Active learners across the past six months.</p></div><span className="period-chip">Last 6 months <ChevronDown size={13} /></span></div><div className="chart-wrap"><ResponsiveContainer width="100%" height={220}><BarChart data={[{ m: 'May', n: 1840 }, { m: 'Jun', n: 1912 }, { m: 'Jul', n: 2054 }, { m: 'Aug', n: 2178 }, { m: 'Sep', n: 2310 }, { m: 'Oct', n: 2486 }]}><XAxis dataKey="m" axisLine={false} tickLine={false} tick={{ fill: '#82928d', fontSize: 11 }} /><YAxis hide /><Tooltip cursor={{ fill: '#f0f5f2' }} contentStyle={{ border: '1px solid #dbe5e1', borderRadius: 10, fontSize: 12 }} /><Bar dataKey="n" fill="#368e7d" radius={[5, 5, 0, 0]} barSize={24} /></BarChart></ResponsiveContainer></div></section><section className="card-shell panel"><div className="panel-head"><div><h3>Needs attention</h3><p>Signals worth a closer look.</p></div><AlertCircle size={19} className="text-accent" /></div><div className="attention-list"><div><span className="attention-icon coral"><ClipboardCheck size={16} /></span><div><strong>48 assignments awaiting review</strong><small>Across 11 courses · up 12% this week</small></div><ChevronRight size={16} /></div><div><span className="attention-icon gold"><UsersRound size={16} /></span><div><strong>23 inactive student accounts</strong><small>No activity for 14+ days</small></div><ChevronRight size={16} /></div><div><span className="attention-icon teal"><Building2 size={16} /></span><div><strong>2 departments need review</strong><small>Annual programme data due Friday</small></div><ChevronRight size={16} /></div></div></section></div><div className="dashboard-grid lower mt-6"><section className="card-shell panel"><div className="panel-head"><div><h3>Recent activity</h3><p>What’s changing across the institution.</p></div><Link href="/admin/activity" className="text-link">Full log <ArrowUpRight size={14} /></Link></div><div className="activity-list">{[{ title: 'New course published', detail: 'CSE 410 · Responsible AI', time: '12 min ago', kind: 'resource' }, { title: 'Faculty administrator added', detail: 'Engineering · Kwesi Armah', time: '1 hr ago', kind: 'feedback' }, { title: 'Assignment threshold updated', detail: 'INF 312 · Policy Brief', time: '3 hrs ago', kind: 'announcement' }, { title: 'New student cohort imported', detail: 'Business School · 2024/25', time: 'Yesterday', kind: 'deadline' }].map((x, i) => <div className="activity-item" key={i}><IconBadge kind={x.kind} /><div><strong>{x.title}</strong><span>{x.detail}</span><small>{x.time}</small></div></div>)}</div></section><section className="card-shell panel"><div className="panel-head"><div><h3>Faculties</h3><p>Current student distribution.</p></div><Link href="/admin/faculties" className="text-link">Manage <ArrowUpRight size={14} /></Link></div><div className="faculty-bars">{[['Computing', 42, 'teal'], ['Business', 27, 'coral'], ['Engineering', 19, 'gold'], ['Arts & Social Sci.', 12, 'blue']].map(([name, n, tone]) => <div key={name as string}><div><span>{name}</span><strong>{n}%</strong></div><ProgressBar value={n as number} tone={tone as string} /></div>)}</div></section></div></div>;
+  return <div className="original-dashboard-stack">
+    <h1 className="original-dashboard-heading">Dashboard Overview</h1>
+    <div className="original-stat-grid">
+      <div className="original-stat-card"><span>Total Users</span><strong>2,486</strong><UsersRound size={16} /></div>
+      <div className="original-stat-card"><span>Departments</span><strong>12</strong><Building2 size={16} /></div>
+      <div className="original-stat-card"><span>Courses</span><strong>84</strong><BookOpen size={16} /></div>
+      <div className="original-stat-card"><span>Assignments</span><strong>312</strong><FileText size={16} /></div>
+    </div>
+  </div>;
 }
 
 type AdminEntity = { id: number; name: string; sub: string; meta: string; status?: string };
