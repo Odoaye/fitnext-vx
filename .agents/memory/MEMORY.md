@@ -1,1 +1,0 @@
-- [Tailwind CSS texture safety](tailwind-css-textures.md) — Prefer CSS-only texture patterns over inline SVG data URIs in Tailwind v4 theme files.
