@@ -20,6 +20,7 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
+    "baseUrl": ".",
     "types": [
       "node",
       "next"
